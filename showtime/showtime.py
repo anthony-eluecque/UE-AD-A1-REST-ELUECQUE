@@ -17,17 +17,16 @@ def home():
 
 @app.route("/showtimes", methods=['GET'])
 def get_json():
-    res = make_response(jsonify(schedule), 200)
-    return res
-
+   res = make_response(jsonify(schedule), 200)
+   return res
 
 @app.route("/showtimes/<date>", methods=['GET'])
 def get_movie_byid(date):
-    for showtime in schedule:
-        if str(showtime["date"]) == str(date):
-            res = make_response(jsonify(showtime),200)
-            return res
-    return make_response(jsonify({"error":"Bad input parameter"}),400)
+   for showtime in schedule:
+      if str(showtime["date"]) == str(date):
+         res = make_response(jsonify(showtime),200)
+         return res
+   return make_response(jsonify({"error":"Bad input parameter"}),400)
 
 if __name__ == "__main__":
    print("Server running in port %s"%(PORT))
