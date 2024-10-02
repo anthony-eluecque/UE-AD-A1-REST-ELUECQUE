@@ -51,8 +51,6 @@ def add_booking_byuser(userid):
    if not current_user : 
       return make_response(jsonify({"error": "User not found"}),404)          
 
-   isCreated = False
-
    for booking in bookings:
       for i,date in enumerate(booking["dates"]):
          if date['date'] == str(showtimes['date']):
@@ -62,13 +60,13 @@ def add_booking_byuser(userid):
    
             if booking == current_user: 
                current_user["dates"][i]["movies"].append(req["movieid"])
-               isCreated = True
+               write(bookings)
+               return make_response(jsonify(req), 200)
 
-   if not isCreated:
-      current_user["dates"].append({
-         "date": req["date"],
-         "movies": [req["movieid"]]
-      })
+   current_user["dates"].append({
+      "date": req["date"],
+      "movies": [req["movieid"]]
+   })
 
    write(bookings)
    return make_response(jsonify(req),200)
