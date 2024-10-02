@@ -35,27 +35,50 @@ def add_booking_byuser(userid):
    req = request.get_json()
 
    url = SHOWTIMES_URL + "/showtimes/" + req["date"]
-   response = requests.get(url).json()
-   # TODO: CHECK STATUS RESPONSE LATER
+   response = requests.get(url)
+   showtimes = response.json()
 
+   if response.status_code == 404:
+      return make_response(showtimes,404)          
 
-   # TODO: ADD ID MOVIES TO MATCHING USER ID
+   def get_current_user():
+      for booking in bookings:
+         if booking["userid"] == userid:
+            return booking
+      return None
+         
+   current_user = get_current_user()
+   if not current_user : 
+      return make_response(jsonify({"error": "User not found"}),404)          
+
+   isCreated = False
 
    for booking in bookings:
-      for date in booking["dates"]:
-         if date['date'] == str(response['date']):
-            for movieId in date['movies']:
+      for i,date in enumerate(booking["dates"]):
+         if date['date'] == str(showtimes['date']):
+            for movieId in date['movies']:   
                if movieId == req['movieid']:
                   return make_response({"error": "An existing item already exists"},409)          
    
+            if booking == current_user: 
+               current_user["dates"][i]["movies"].append(req["movieid"])
+               isCreated = True
+
+   if not isCreated:
+      current_user["dates"].append({
+         "date": req["date"],
+         "movies": [req["movieid"]]
+      })
+
+   write(bookings)
    return make_response(jsonify(req),200)
 
 def write(bookings):
-    data =  {
+   data =  {
       "bookings" : bookings
-    }
-    with open('{}/databases/movies.json'.format("."), 'w') as f:
-        json.dump(data, f, indent=4)
+   }
+   with open('{}/databases/bookings.json'.format("."), 'w') as f:
+      json.dump(data, f, indent=2)
 
 if __name__ == "__main__":
    print("Server running in port %s"%(PORT))
