@@ -13,3 +13,4 @@ requests==2.32.3
 urllib3==2.2.2
 watchdog==5.0.0
 Werkzeug==3.0.4
+typing-extensions==4.12.2
