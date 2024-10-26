@@ -9,17 +9,16 @@ data_folder = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 USERS_DB_PATH : str = f"{data_folder}/users.json"
 
 class UserRepository:
-   def __init__(self):
-        with open('{}/databases/users.json'.format("."), "r") as jsf:
-            self.users : list[User] = json.load(jsf)["users"]
+    def __init__(self):
+        self.users: list[User] = Json.open(USERS_DB_PATH,"users")
 
-   def get_user_by_id(self : Self, id : str) -> User | None:
+    def get_user_by_id(self : Self, id : str) -> User | None:
         for user in self.users:
             if user["id"] == id:
                 return user
         return None
-   
-   def create_user(self: Self, user: User) -> None:
+
+    def create_user(self: Self, user: User) -> None:
         if user in self.users:
             return
         
