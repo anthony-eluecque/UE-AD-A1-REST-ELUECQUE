@@ -26,7 +26,7 @@ def get_movies_bydate(date):
       if str(showtime["date"]) == str(date):
          res = make_response(jsonify(showtime),200)
          return res
-   return make_response(jsonify({"error":"Bad input parameter"}),400)
+   return make_response(jsonify({"error":"Data not found"}),404)
 
 if __name__ == "__main__":
    print("Server running in port %s"%(PORT))
