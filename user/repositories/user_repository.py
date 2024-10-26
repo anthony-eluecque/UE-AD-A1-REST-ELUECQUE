@@ -20,5 +20,8 @@ class UserRepository:
         return None
    
    def create_user(self: Self, user: User) -> None:
-       self.users.append(user)
-       Json.write(USERS_DB_PATH, "users", self.users)
+        if user in self.users:
+            return
+        
+        self.users.append(user)
+        Json.write(USERS_DB_PATH, "users", self.users)
