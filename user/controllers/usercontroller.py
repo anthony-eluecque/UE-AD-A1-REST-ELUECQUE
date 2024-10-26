@@ -2,6 +2,7 @@ from flask import Response, jsonify, make_response, request
 from repositories import UserRepository
 from models import Error, User
 from context import bp
+import requests
 
 ERRORS: dict[str, Error] = {
    "USER_NOT_FOUND": {
@@ -17,6 +18,8 @@ ERRORS: dict[str, Error] = {
       "message": "Internal server error"
    }
 }
+
+BOOKINGS_URL = "http://127.0.0.1:3201"
 
 class UserController:
    userRepository = UserRepository()
@@ -34,7 +37,7 @@ class UserController:
       return make_response(jsonify(ERRORS["USER_NOT_FOUND"]))
    
    @bp.route("/", methods=['POST'])
-   def create_user():
+   def create_user() -> Response:
       req = request.get_json()
       new_user : User = {
          "id": req["id"],
@@ -43,7 +46,18 @@ class UserController:
       }
       UserController.userRepository.create_user(new_user)
       return make_response(jsonify({}),204)
+   
+   @bp.route("/<userid>/bookings", methods=['GET'])
+   def get_bookings_from_user_id(userid):
+      url = BOOKINGS_URL + "/bookings/" + userid
+      response = requests.get(url)
+      bookings = response.json()
+      return make_response(jsonify(bookings),200)
+   
+   # TODO
+   @bp.route("/<userid>/bookings/movies")
+   def get_movies_details_from_user_bookings(userid,movieid):
+      pass
 
    # TODO
-   # /:id/bookings GET 
    # /:id/bookings POST
