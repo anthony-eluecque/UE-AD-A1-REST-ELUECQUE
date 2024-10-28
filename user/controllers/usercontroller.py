@@ -3,9 +3,15 @@ from repositories import UserRepository
 from models import Error, User
 from context import bp
 import requests
+from services import BookingService, MovieService
+from dto import BookingDTO
 
 ERRORS: dict[str, Error] = {
    "USER_NOT_FOUND": {
+      "code": 404,
+      "message": "User not found"
+   },
+   "BOOKINGS_NOT_FOUND": {
       "code": 404,
       "message": "User not found"
    },
@@ -39,25 +45,42 @@ class UserController:
    @bp.route("/", methods=['POST'])
    def create_user() -> Response:
       req = request.get_json()
-      new_user : User = {
+      user : User = {
          "id": req["id"],
          "name": req["name"],
          "last_active": req["last_active"]
       }
-      UserController.userRepository.create_user(new_user)
+      UserController.userRepository.create_user(user)
       return make_response(jsonify({}),204)
    
    @bp.route("/<userid>/bookings", methods=['GET'])
    def get_bookings_from_user_id(userid):
-      url = BOOKINGS_URL + "/bookings/" + userid
-      response = requests.get(url)
-      bookings = response.json()
-      return make_response(jsonify(bookings),200)
+      bookings_data = BookingService.get_user_bookings(userid)
+         
+      if bookings_data:
+         bookings = [BookingDTO(**booking) for booking in bookings_data["dates"]]
+         return make_response(jsonify([booking.__dict__ for booking in bookings]), 200)
+      return make_response(jsonify(ERRORS["BOOKINGS_NOT_FOUND"]), 404)
    
-   # TODO
-   @bp.route("/<userid>/bookings/movies")
-   def get_movies_details_from_user_bookings(userid,movieid):
-      pass
+   @bp.route("/<userid>/bookings/<date>/movies")
+   def get_movies_details_from_user_bookings(userid,date):
+      bookings_data = BookingService.get_user_bookings(userid)
+      if not bookings_data:
+         return make_response(jsonify(ERRORS["BOOKINGS_NOT_FOUND"]), 404)
+      
+      bookings = [BookingDTO(**booking) for booking in bookings_data["dates"]]
+      movies = []
+
+      for booking in bookings:
+         if booking.date == date:
+            for movie_id in booking.movies:
+               movie = MovieService.get_movie_details(movie_id)
+               if movie:
+                  movies.append(movie)
+               else:
+                  return make_response(jsonify(ERRORS["MOVIE_NOT_FOUND"]), 404)
+      return make_response(jsonify(movies),200)
 
    # TODO
    # /:id/bookings POST
+

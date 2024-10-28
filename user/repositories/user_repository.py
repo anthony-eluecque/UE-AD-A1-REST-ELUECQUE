@@ -20,6 +20,7 @@ class UserRepository:
 
     def create_user(self: Self, user: User) -> None:
         if user in self.users:
+            # TODO: Raise an error here instead of returning None
             return
         
         self.users.append(user)
