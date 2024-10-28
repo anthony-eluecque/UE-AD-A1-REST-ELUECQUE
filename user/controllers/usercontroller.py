@@ -61,6 +61,19 @@ class UserController:
                   return ResponseHelper.error("MOVIE_NOT_FOUND")
       return ResponseHelper.success(movies)
 
-   # TODO
-   # /:id/bookings POST
-
+   @bp.route("/<userid>/bookings", methods=["POST"])
+   def add_user_booking(userid): 
+      booking_data = request.get_json()
+      if not booking_data:
+         return ResponseHelper.error("MISSING_PARAMETERS")
+      
+      booking_response, status_code = BookingService.create_user_booking(userid, booking_data)
+         
+      if status_code == 200:
+         return ResponseHelper.success(booking_response, 201)
+      elif status_code == 409:
+         return ResponseHelper.error("BOOKING_ALREADY_EXISTS")
+      elif status_code == 404:
+         return ResponseHelper.error("DATE OR USER NOT FOUND", 404)
+      
+      return ResponseHelper.error("INTERNAL_SERVER_ERROR")
