@@ -1,10 +1,11 @@
-from flask import Response, jsonify, make_response, request
+from flask import Response, request
 from repositories import UserRepository
 from models import User, ERRORS
 from context import bp
 import requests
 from services import BookingService, MovieService
 from dto import BookingDTO
+from helpers import ResponseHelper
 
 class UserController:
    userRepository = UserRepository()
@@ -18,8 +19,8 @@ class UserController:
       user = UserController.userRepository.get_user_by_id(str(userid))
    
       if (user):
-         return make_response(jsonify(user),200)
-      return make_response(jsonify(ERRORS["USER_NOT_FOUND"]))
+         return ResponseHelper.success(user)
+      return ResponseHelper.error("USER_NOT_FOUND")
    
    @bp.route("/", methods=['POST'])
    def create_user() -> Response:
@@ -30,7 +31,7 @@ class UserController:
          "last_active": req["last_active"]
       }
       UserController.userRepository.create_user(user)
-      return make_response(jsonify({}),204)
+      return ResponseHelper.success(None,204)
    
    @bp.route("/<userid>/bookings", methods=['GET'])
    def get_bookings_from_user_id(userid):
@@ -38,14 +39,14 @@ class UserController:
          
       if bookings_data:
          bookings = [BookingDTO(**booking) for booking in bookings_data["dates"]]
-         return make_response(jsonify([booking.__dict__ for booking in bookings]), 200)
-      return make_response(jsonify(ERRORS["BOOKINGS_NOT_FOUND"]), 404)
+         return ResponseHelper.success([booking.__dict__ for booking in bookings])
+      return ResponseHelper.error("BOOKINGS_NOT_FOUND", 404)
    
    @bp.route("/<userid>/bookings/<date>/movies")
    def get_movies_details_from_user_bookings(userid,date):
       bookings_data = BookingService.get_user_bookings(userid)
       if not bookings_data:
-         return make_response(jsonify(ERRORS["BOOKINGS_NOT_FOUND"]), 404)
+         return ResponseHelper.error("USER_NOT_FOUND")
       
       bookings = [BookingDTO(**booking) for booking in bookings_data["dates"]]
       movies = []
@@ -57,8 +58,8 @@ class UserController:
                if movie:
                   movies.append(movie)
                else:
-                  return make_response(jsonify(ERRORS["MOVIE_NOT_FOUND"]), 404)
-      return make_response(jsonify(movies),200)
+                  return ResponseHelper.error("MOVIE_NOT_FOUND")
+      return ResponseHelper.success(movies)
 
    # TODO
    # /:id/bookings POST
