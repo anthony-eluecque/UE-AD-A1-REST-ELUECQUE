@@ -1,31 +1,10 @@
 from flask import Response, jsonify, make_response, request
 from repositories import UserRepository
-from models import Error, User
+from models import User, ERRORS
 from context import bp
 import requests
 from services import BookingService, MovieService
 from dto import BookingDTO
-
-ERRORS: dict[str, Error] = {
-   "USER_NOT_FOUND": {
-      "code": 404,
-      "message": "User not found"
-   },
-   "BOOKINGS_NOT_FOUND": {
-      "code": 404,
-      "message": "User not found"
-   },
-   "MISSING_PARAMETERS": {
-      "code": 400,
-      "message": "Missing or invalid parameters"
-   },
-   "INTERNAL_SERVER_ERROR": {
-      "code": 500,
-      "message": "Internal server error"
-   }
-}
-
-BOOKINGS_URL = "http://127.0.0.1:3201"
 
 class UserController:
    userRepository = UserRepository()
