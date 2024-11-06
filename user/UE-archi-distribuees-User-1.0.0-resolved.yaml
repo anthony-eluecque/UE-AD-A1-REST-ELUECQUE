@@ -1,0 +1,245 @@
+openapi: 3.0.3
+info:
+  title: User Service API
+  description: API for managing users, bookings, and movie data in the User microservice.
+  version: 1.0.0
+  contact:
+    email: your_email@example.com
+  license:
+    name: GPL v3
+    url: https://www.gnu.org/licenses/gpl-3.0.en.html
+tags:
+  - name: users
+    description: Operations related to user management
+  - name: bookings
+    description: Operations related to user bookings
+  - name: movies
+    description: Operations related to movie details for bookings
+
+paths:
+  /:
+    get:
+      tags:
+        - users
+      summary: Home page of the User service
+      operationId: home
+      responses:
+        "200":
+          description: Welcome message
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "<h1 style='color:blue'>Welcome to the User service!</h1>"
+
+  /{userid}:
+    get:
+      tags:
+        - users
+      summary: Get user by ID
+      operationId: getUserById
+      parameters:
+        - name: userid
+          in: path
+          required: true
+          description: ID of the user to retrieve
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    post:
+      tags:
+        - users
+      summary: Create a new user
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        "204":
+          description: User created successfully
+        "400":
+          description: Missing or invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /{userid}/bookings:
+    get:
+      tags:
+        - bookings
+      summary: Get bookings for a user
+      operationId: getBookingsByUserId
+      parameters:
+        - name: userid
+          in: path
+          required: true
+          description: ID of the user whose bookings are retrieved
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of bookings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Booking"
+        "404":
+          description: Bookings not found for the user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    post:
+      tags:
+        - bookings
+      summary: Add a new booking for a user
+      operationId: addUserBooking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Booking"
+      responses:
+        "201":
+          description: Booking created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Booking"
+        "409":
+          description: Booking already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: User or date not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /{userid}/bookings/{date}/movies:
+    get:
+      tags:
+        - movies
+      summary: Get movie details for a user's bookings on a specific date
+      operationId: getMoviesDetailsFromUserBookings
+      parameters:
+        - name: userid
+          in: path
+          required: true
+          description: ID of the user
+          schema:
+            type: string
+        - name: date
+          in: path
+          required: true
+          description: Date of the booking in YYYY-MM-DD format
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: List of movies for the specified booking date
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Movie"
+        "404":
+          description: User or booking not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - id
+        - name
+        - last_active
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the user
+        name:
+          type: string
+          description: Name of the user
+        last_active:
+          type: string
+          format: date-time
+          description: Last active timestamp of the user
+
+    Booking:
+      type: object
+      required:
+        - date
+        - movies
+      properties:
+        date:
+          type: string
+          format: date
+          example: "2023-10-01"
+        movies:
+          type: array
+          items:
+            type: string
+          description: List of movie IDs associated with the booking
+
+    Movie:
+      type: object
+      required:
+        - movie_id
+        - title
+        - genre
+      properties:
+        movie_id:
+          type: string
+          description: Unique identifier for the movie
+        title:
+          type: string
+          description: Title of the movie
+        genre:
+          type: string
+          description: Genre of the movie
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
