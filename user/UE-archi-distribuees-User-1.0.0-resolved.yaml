@@ -162,7 +162,7 @@ paths:
         - name: date
           in: path
           required: true
-          description: Date of the booking in YYYY-MM-DD format
+          description: Date of the booking in YYYYMMDD string format
           schema:
             type: string
             format: date
@@ -199,7 +199,6 @@ components:
           description: Name of the user
         last_active:
           type: string
-          format: date-time
           description: Last active timestamp of the user
 
     Booking:
@@ -210,8 +209,7 @@ components:
       properties:
         date:
           type: string
-          format: date
-          example: "2023-10-01"
+          example: "20231001"
         movies:
           type: array
           items:
