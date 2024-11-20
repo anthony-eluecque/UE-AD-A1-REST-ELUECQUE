@@ -1,6 +1,7 @@
 import requests
+import os 
 
-BOOKINGS_URL = "http://127.0.0.1:3201"
+BOOKINGS_URL = os.getenv("BOOKING_CLIENT")
 
 class BookingService:
     @staticmethod

@@ -1,11 +1,15 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from flask import Flask, render_template, request, jsonify, make_response
 import requests
 import json
 from werkzeug.exceptions import NotFound
+import os 
 
 app = Flask(__name__)
 
-SHOWTIMES_URL = "http://127.0.0.1:3202"
+SHOWTIMES_URL = os.getenv("SHOWTIME_CLIENT")
 
 PORT = 3201
 HOST = '0.0.0.0'
@@ -33,6 +37,9 @@ def get_booking_for_user(userid):
 @app.route("/bookings/<userid>", methods=['POST'])
 def add_booking_byuser(userid):
    req = request.get_json()
+
+   if not SHOWTIMES_URL:
+      raise ValueError("Showtime url key is required")
 
    url = SHOWTIMES_URL + "/showtimes/" + req["date"]
    response = requests.get(url)

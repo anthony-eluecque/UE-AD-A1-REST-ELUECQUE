@@ -35,7 +35,7 @@ class UserController:
    
    @bp.route("/<userid>/bookings", methods=['GET'])
    def get_bookings_from_user_id(userid):
-      bookings_data = BookingService.get_user_bookings(userid)
+      bookings_data = BookingService.get_user_bookings(str(userid))
          
       if bookings_data:
          bookings = [BookingDTO(**booking) for booking in bookings_data["dates"]]
@@ -44,7 +44,7 @@ class UserController:
    
    @bp.route("/<userid>/bookings/<date>/movies")
    def get_movies_details_from_user_bookings(userid,date):
-      bookings_data = BookingService.get_user_bookings(userid)
+      bookings_data = BookingService.get_user_bookings(str(userid))
       if not bookings_data:
          return ResponseHelper.error("USER_NOT_FOUND")
       
@@ -67,7 +67,7 @@ class UserController:
       if not booking_data:
          return ResponseHelper.error("MISSING_PARAMETERS")
       
-      booking_response, status_code = BookingService.create_user_booking(userid, booking_data)
+      booking_response, status_code = BookingService.create_user_booking(str(userid), booking_data)
          
       if status_code == 200:
          return ResponseHelper.success(booking_response, 201)

@@ -1,6 +1,6 @@
 import requests
-
-MOVIE_SERVICE_URL = "http://127.0.0.1:3200"
+import os 
+MOVIE_SERVICE_URL = os.getenv("MOVIE_CLIENT")
 
 class MovieService:
     @staticmethod
