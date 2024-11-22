@@ -121,7 +121,7 @@ def create_movie(movieid):
 def update_movie_rating(movieid, rate):
     for movie in movies:
         if str(movie["id"]) == str(movieid):
-            movie["rating"] = rate
+            movie["rating"] = float(rate)
             write(movies)
             res = make_response(jsonify(movie),200)
             return res
